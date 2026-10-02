@@ -47,7 +47,7 @@ LOGO_WIDTH = 440               # px on screen
 LOGO_CENTER_Y = 830            # slightly above centre (960)
 TEXT_GAP = 190                 # logo bottom -> text top
 FONT_SIZE = 43                 # ~4% of 1080
-TRACKING = 0.32                # extra letter spacing, in em
+TRACKING = 0.20                # extra letter spacing, in em
 
 LOGO_FADE_START = 12.5
 LOGO_FADE_LEN = 1.0
@@ -114,9 +114,10 @@ class EndCard:
         logo = ImageOps.exif_transpose(logo).convert("RGBA")
         alpha = np.asarray(logo.getchannel("A"), dtype=np.float32)
         if alpha.min() > 250:
-            # opaque logo on white: derive alpha from darkness
+            # opaque logo on white: derive alpha from darkness, treating
+            # near-white (compression noise / off-white paper) as transparent
             lum = np.asarray(logo.convert("L"), dtype=np.float32)
-            alpha = np.clip((255.0 - lum) * (255.0 / 235.0), 0, 255)
+            alpha = np.clip((230.0 - lum) * (255.0 / 200.0), 0, 255)
             ink = np.zeros((*alpha.shape, 3), dtype=np.uint8)
             logo = Image.fromarray(np.dstack([ink, alpha.astype(np.uint8)]),
                                    "RGBA")
